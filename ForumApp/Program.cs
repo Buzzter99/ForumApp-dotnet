@@ -1,4 +1,5 @@
 using ForumApp.Data;
+using ForumApp.Middlewares;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -41,6 +42,7 @@ namespace ForumApp
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             var app = builder.Build();
+            //app.UseMiddleware<ApiKeyMiddleware>();
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();

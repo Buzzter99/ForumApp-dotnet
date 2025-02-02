@@ -31,6 +31,13 @@ namespace ForumApp
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
             });
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.Cookie.Name = "ForumApp.AuthCookie";
+                options.Cookie.HttpOnly = true;  
+                options.ExpireTimeSpan = TimeSpan.FromHours(4);
+                options.SlidingExpiration = true;
+            });
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             var app = builder.Build();

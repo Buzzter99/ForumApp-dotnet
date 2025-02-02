@@ -20,6 +20,7 @@ namespace ForumApp.Controllers
         }
         [HttpPost("Login")]
         [AllowAnonymous]
+        [AuthorizationLoggedIn]
         public async Task<IActionResult> Login([FromBody]LoginUserViewModel user)
         {
             if (!ModelState.IsValid)
@@ -40,6 +41,8 @@ namespace ForumApp.Controllers
             return Ok(new ApiResponse { StatusCode = 200, Message="Logged in succesfully!"});
         }
         [HttpPost("Register")]
+        [AllowAnonymous]
+        [AuthorizationLoggedIn]
         public async Task<IActionResult> Register([FromBody] RegisterUserViewModel user)
         {
             if (!ModelState.IsValid)
@@ -69,6 +72,7 @@ namespace ForumApp.Controllers
             return Ok(new ApiResponse { StatusCode = 500, Message = string.Join("",isCreated.Errors.Select(c => c.Description)) });
         }
         [HttpGet("IsLoggedIn")]
+        [AllowAnonymous]
         public async Task<IActionResult> IsLoggedIn()
         {
             var user = await _userManager.GetUserAsync(User);

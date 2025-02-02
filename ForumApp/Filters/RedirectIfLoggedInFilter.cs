@@ -3,14 +3,14 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace ForumApp.Filters
 {
-    public class AuthorizationFilter : IAuthorizationFilter
+    public class RedirectIfLoggedInFilter : IAuthorizationFilter
     {
         public void OnAuthorization(AuthorizationFilterContext context)
         {
             var user = context.HttpContext.User;
-            if (user == null || !user.Identity.IsAuthenticated)
+            if (user != null && user.Identity.IsAuthenticated)
             {
-                context.Result = new JsonResult(new { StatusCode = 401, Message = "Unauthorized. Please log in first." })
+                context.Result = new JsonResult(new { StatusCode = 401, Message = "Cannot access this endpoint when logged in!" })
                 {
                     StatusCode = StatusCodes.Status200OK
                 };

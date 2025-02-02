@@ -1,23 +1,20 @@
-﻿using ForumApp.Data;
-using ForumApp.Models;
+﻿using ForumApp.Models;
+using ForumApp.Attributes;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ForumApp.Controllers
 {
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IConfiguration _configuration;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
-        public UserController(ApplicationDbContext context, IConfiguration configuration, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
+        public UserController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
         {
-            _context = context;
-            _configuration = configuration;
             _userManager = userManager;
             _signInManager = signInManager;
         }
@@ -32,7 +29,7 @@ namespace ForumApp.Controllers
             var requestedUser = await _userManager.FindByEmailAsync(user.Email);
             if (requestedUser == null)
             {
-                return Ok(new ApiResponse { StatusCode = 401, Message = "Unauthorized"});
+                return Ok(new ApiResponse { StatusCode = 401, Message = "Invalid username or password!"});
             }
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
             var result = await _signInManager.PasswordSignInAsync(requestedUser, user.Password, true, false);
@@ -80,6 +77,19 @@ namespace ForumApp.Controllers
                 return Ok(new ApiResponse { StatusCode = 401, Message = "Unauthorized" });
             }
             return Ok(new ApiResponse { StatusCode = 200, Message = $"Welcome {user.UserName}" });
+        }
+        [HttpPost("Logout")]
+        [Authorization]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return Ok(new ApiResponse { StatusCode = 200, Message = "Logged out successfully!" });
+        }
+        [HttpGet("All")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var users = await _userManager.Users.ToListAsync();
+            return Ok(users);
         }
     }
 }

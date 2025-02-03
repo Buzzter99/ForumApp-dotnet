@@ -20,7 +20,7 @@ namespace ForumApp
             });
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
+                options.UseOracle(connectionString,x => x.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19)));
             builder.Services.AddIdentity<IdentityUser, IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
@@ -42,11 +42,19 @@ namespace ForumApp
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             var app = builder.Build();
-            //app.UseMiddleware<ApiKeyMiddleware>();
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                dbContext.Database.Migrate();
+                dbContext.Database.EnsureCreated();
+            }
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
+            } else if (app.Environment.IsProduction())
+            {
+                app.UseMiddleware<ApiKeyMiddleware>();
             }
             app.UseHttpsRedirection();
             app.UseAuthorization();
